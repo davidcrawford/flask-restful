@@ -9,12 +9,13 @@ from werkzeug.exceptions import HTTPException, MethodNotAllowed, NotFound
 from werkzeug.http import HTTP_STATUS_CODES
 from flask.ext.restful.utils import unauthorized, error_data, unpack
 from flask.ext.restful.representations.json import output_json
+import sys
 
 try:
     #noinspection PyUnresolvedReferences
     from collections import OrderedDict
 except ImportError:
-    from utils.ordereddict import OrderedDict
+    from .utils.ordereddict import OrderedDict
 
 __all__ = ('Api', 'Resource', 'marshal', 'marshal_with', 'abort')
 
@@ -151,13 +152,19 @@ class Api(object):
         :type e: Exception
 
         """
-        got_request_exception.send(self, exception=e)
+        got_request_exception.send(self.app, exception=e)
 
         code = getattr(e, 'code', 500)
         data = getattr(e, 'data', error_data(code))
 
         if code >= 500:
-            self.app.logger.exception("Internal Error")
+
+            # There's currently a bug in Python3 that disallows calling
+            # logging.exception() when an exception hasn't actually be raised
+            if sys.exc_info() == (None, None, None):
+                self.app.logger.error("Internal Error")
+            else:
+                self.app.logger.exception("Internal Error")
 
         if code == 404 and ('message' not in data or
                             data['message'] == HTTP_STATUS_CODES[404]):
@@ -217,8 +224,10 @@ class Api(object):
         self.endpoints.add(endpoint)
 
         if endpoint in self.app.view_functions.keys():
-            previous_view_class = self.app.view_functions[endpoint].func_dict['view_class']
-            if previous_view_class != resource: # if you override with a different class the endpoint, avoid the collision by raising an exception
+            previous_view_class = self.app.view_functions[endpoint].__dict__['view_class']
+
+            # if you override the endpoint with a different class, avoid the collision by raising an exception
+            if previous_view_class != resource:
                 raise ValueError('This endpoint (%s) is already set to the class %s.' % (endpoint, previous_view_class.__name__))
 
         resource.mediatypes = self.mediatypes_method()  # Hacky

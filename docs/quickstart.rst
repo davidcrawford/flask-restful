@@ -19,16 +19,16 @@ A minimal Flask-RESTful API looks like this: ::
 
     from flask import Flask
     from flask.ext import restful
-    
+
     app = Flask(__name__)
     api = restful.Api(app)
-    
+
     class HelloWorld(restful.Resource):
         def get(self):
             return {'hello': 'world'}
-    
+
     api.add_resource(HelloWorld, '/')
-    
+
     if __name__ == '__main__':
         app.run(debug=True)
 
@@ -92,13 +92,13 @@ You can try it like this: ::
 
     Or from python if you have the requests library installed:
      >>> from requests import put, get
-     >>> put('http://localhost:5000/todo1', data={'data': 'Remember the milk'}).json
+     >>> put('http://localhost:5000/todo1', data={'data': 'Remember the milk'}).json()
      {u'todo1': u'Remember the milk'}
-     >>> get('http://localhost:5000/todo1').json
+     >>> get('http://localhost:5000/todo1').json()
      {u'todo1': u'Remember the milk'}
-     >>> put('http://localhost:5000/todo2', data={'data': 'Change my breakpads'}).json
+     >>> put('http://localhost:5000/todo2', data={'data': 'Change my breakpads'}).json()
      {u'todo2': u'Change my breakpads'}
-     >>> get('http://localhost:5000/todo2').json
+     >>> get('http://localhost:5000/todo2').json()
      {u'todo2': u'Change my breakpads'}
 
 Flask-RESTful understands multiple kinds of return values from view methods.
@@ -111,12 +111,12 @@ as shown below: ::
         def get(self):
             # Default to 200 OK
             return {'task': 'Hello world'}
-    
+
     class Todo2(Resource):
         def get(self):
             # Set the response code to 201
             return {'task': 'Hello world'}, 201
-    
+
     class Todo3(Resource):
         def get(self):
             # Set the response code to 201 and return custom headers
@@ -148,7 +148,7 @@ has built-in support for request data validation using a library similar to
 `argparse <http://docs.python.org/dev/library/argparse.html>`_. ::
 
     from flask.ext.restful import reqparse
-    
+
     parser = reqparse.RequestParser()
     parser.add_argument('rate', type=int, help='Rate to charge for this resource')
     args = parser.parse_args()
@@ -218,7 +218,7 @@ Save this example in api.py ::
     from flask.ext.restful import reqparse, abort, Api, Resource
 
     app = Flask(__name__)
-    api = restful.Api(app)
+    api = Api(app)
 
     TODOS = {
         'todo1': {'task': 'build an API'},
@@ -226,12 +226,14 @@ Save this example in api.py ::
         'todo3': {'task': 'profit!'},
     }
 
+
     def abort_if_todo_doesnt_exist(todo_id):
         if todo_id not in TODOS:
             abort(404, message="Todo {} doesn't exist".format(todo_id))
 
     parser = reqparse.RequestParser()
     parser.add_argument('task', type=str)
+
 
     # Todo
     #   show a single todo item and lets you delete them

@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='Flask-RESTful',
-    version='0.2.2',
+    version='0.2.3',
     url='https://www.github.com/twilio/flask-restful/',
     author='Kyle Conroy',
     author_email='help@twilio.com',
@@ -17,6 +17,7 @@ setup(
     setup_requires=[
         'nose>=1.1.2',
         'mock>=0.8',
+        'six>=1.3.0',
         'blinker==1.2',
     ],
     install_requires=[
